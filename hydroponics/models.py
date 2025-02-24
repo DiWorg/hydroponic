@@ -31,9 +31,9 @@ class Sensor(models.Model):
 class Measurement(models.Model):
     system = models.ForeignKey(HydroponicSystem, on_delete=models.CASCADE,
                                related_name="measurements")
-    ph = models.DecimalField(max_digits=4, decimal_places=2)
-    temperature = models.DecimalField(max_digits=5, decimal_places=2)
-    tds = models.IntegerField()
+    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE,
+                               related_name="measurements")
+    value = models.DecimalField(max_digits=10, decimal_places=2)
     measured_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
