@@ -48,12 +48,31 @@ class SensorSerializer(serializers.ModelSerializer):
         return attrs
 
 class HydroponicSystemSerializer(serializers.ModelSerializer):
-    sensors = SensorSerializer(many=True, read_only=True)
+    sensors = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     owner = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = HydroponicSystem
         fields = ['id', 'name', 'description', 'owner', 'sensors', 'created_at']
+
+    def validate_name(self, value):
+        user = self.context['request'].user
+        if HydroponicSystem.objects.filter(owner=user, name=value).exists():
+            raise serializers.ValidationError("Masz już system o tej nazwie.")
+        return value
+
+class HydroponicSystemDetailSerializer(serializers.ModelSerializer):
+    sensors = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    owner = serializers.StringRelatedField(read_only=True)
+    last_10_measurements = serializers.SerializerMethodField()
+
+    class Meta:
+        model = HydroponicSystem
+        fields = ['id', 'name', 'description', 'owner', 'sensors', 'created_at', 'last_10_measurements']
+
+    def get_last_10_measurements(self, obj):
+        measurements = Measurement.objects.filter(sensor__system=obj).order_by('-measured_at')[:10]
+        return MeasurementSerializer(measurements, many=True).data
 
     def validate_name(self, value):
         user = self.context['request'].user

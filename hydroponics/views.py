@@ -4,7 +4,8 @@ from .filters import MeasurementFilter, SensorFilter
 from .models import HydroponicSystem, Sensor, Measurement
 from .pagination import AddPageNumberPagination
 from .permissions import IsOwner
-from .serializers import HydroponicSystemSerializer, SensorSerializer, MeasurementSerializer
+from .serializers import HydroponicSystemSerializer, SensorSerializer, MeasurementSerializer, \
+    HydroponicSystemDetailSerializer
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
@@ -24,6 +25,13 @@ class HydroponicSystemViewSet(viewsets.ModelViewSet):
 
     ordering_fields = ['name', 'created_at']
     ordering = ['-created_at']
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return HydroponicSystemSerializer
+        if self.action == 'retrieve':
+            return HydroponicSystemDetailSerializer
+        return HydroponicSystemSerializer
 
     def get_queryset(self):
         return HydroponicSystem.objects.filter(owner=self.request.user)
