@@ -9,7 +9,7 @@ class HydroponicSystem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.id} – {self.name}"
 
 
 class Sensor(models.Model):
@@ -26,7 +26,7 @@ class Sensor(models.Model):
     name = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.name} ({self.get_sensor_type_display()})"
+        return f"{self.id} – {self.name} ({self.get_sensor_type_display()})"
 
 class Measurement(models.Model):
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE,
@@ -35,4 +35,4 @@ class Measurement(models.Model):
     measured_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.system.name} - {self.measured_at}"
+        return f"{self.id} - {self.sensor.name} - {self.measured_at}"

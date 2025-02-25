@@ -21,8 +21,6 @@ class MeasurementSerializer(serializers.ModelSerializer):
         if sensor.system.owner != user:
             raise serializers.ValidationError("Nie możesz dodać pomiaru do cudzego systemu.")
 
-        validated_data['system'] = sensor.system
-
         return super().create(validated_data)
 
 class SensorSerializer(serializers.ModelSerializer):

@@ -9,5 +9,5 @@ class IsOwner(permissions.BasePermission):
         elif isinstance(obj, Sensor):
             return obj.system.owner == request.user
         elif isinstance(obj, Measurement):
-            return obj.system.owner == request.user
+            return obj.sensor.system.owner == request.user
         return False
