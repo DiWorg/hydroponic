@@ -139,7 +139,9 @@ class HydroponicSystemSerializer(serializers.ModelSerializer):
 
     def validate_name(self, value):
         user = self.context["request"].user
-        if HydroponicSystem.objects.filter(owner=user, name=value).exists():
+        system_id = self.instance.id if self.instance else None
+
+        if HydroponicSystem.objects.filter(owner=user, name=value).exclude(id=system_id).exists():
             raise serializers.ValidationError(
                 "You already have a system with that name."
             )
@@ -188,7 +190,9 @@ class HydroponicSystemDetailSerializer(serializers.ModelSerializer):
         Ensures non-dup system names for user.
         """
         user = self.context["request"].user
-        if HydroponicSystem.objects.filter(owner=user, name=value).exists():
+        system_id = self.instance.id if self.instance else None
+
+        if HydroponicSystem.objects.filter(owner=user, name=value).exclude(id=system_id).exists():
             raise serializers.ValidationError(
                 "You already have a system with that name."
             )
