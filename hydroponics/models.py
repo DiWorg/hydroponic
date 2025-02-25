@@ -29,8 +29,6 @@ class Sensor(models.Model):
         return f"{self.name} ({self.get_sensor_type_display()})"
 
 class Measurement(models.Model):
-    system = models.ForeignKey(HydroponicSystem, on_delete=models.CASCADE,
-                               related_name="measurements")
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE,
                                related_name="measurements")
     value = models.DecimalField(max_digits=10, decimal_places=2)
