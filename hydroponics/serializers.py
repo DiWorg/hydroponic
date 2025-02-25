@@ -1,51 +1,66 @@
 from rest_framework import serializers
-from .models import HydroponicSystem, Sensor, Measurement
+
+from .models import HydroponicSystem, Measurement, Sensor
+
 
 class MeasurementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Measurement
-        fields = ['id', 'sensor', 'value', 'measured_at']
-        read_only_fields = ['id', 'measured_at']
+        fields = ["id", "sensor", "value", "measured_at"]
+        read_only_fields = ["id", "measured_at"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        request = self.context.get('request')
-        if request and hasattr(request, 'user'):
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
             user = request.user
-            self.fields['sensor'].queryset = Sensor.objects.filter(system__owner=user)
+            self.fields["sensor"].queryset = Sensor.objects.filter(system__owner=user)
 
     def create(self, validated_data):
-        sensor = validated_data['sensor']
-        user = self.context['request'].user
+        sensor = validated_data["sensor"]
+        user = self.context["request"].user
 
         if sensor.system.owner != user:
-            raise serializers.ValidationError("Nie możesz dodać pomiaru do cudzego systemu.")
+            raise serializers.ValidationError(
+                "Nie możesz dodać pomiaru do cudzego systemu."
+            )
 
         return super().create(validated_data)
 
+
 class SensorSerializer(serializers.ModelSerializer):
-    sensor_type_display = serializers.CharField(source='get_sensor_type_display',
-                                                read_only=True)
+    sensor_type_display = serializers.CharField(
+        source="get_sensor_type_display", read_only=True
+    )
     measurements = MeasurementSerializer(many=True, read_only=True)
 
     class Meta:
         model = Sensor
-        fields = ['id', 'system', 'name', 'sensor_type', 'sensor_type_display',
-                  'measurements']
+        fields = [
+            "id",
+            "system",
+            "name",
+            "sensor_type",
+            "sensor_type_display",
+            "measurements",
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        request = self.context.get('request')
-        if request and hasattr(request, 'user'):
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
             user = request.user
-            self.fields['system'].queryset = HydroponicSystem.objects.filter(owner=user)
+            self.fields["system"].queryset = HydroponicSystem.objects.filter(owner=user)
 
     def validate(self, attrs):
-        system = attrs.get('system')
-        user = self.context['request'].user
+        system = attrs.get("system")
+        user = self.context["request"].user
         if system.owner != user:
-            raise serializers.ValidationError("System nie należy do zalogowanego użytkownika.")
+            raise serializers.ValidationError(
+                "System nie należy do zalogowanego użytkownika."
+            )
         return attrs
+
 
 class HydroponicSystemSerializer(serializers.ModelSerializer):
     sensors = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -53,13 +68,14 @@ class HydroponicSystemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HydroponicSystem
-        fields = ['id', 'name', 'description', 'owner', 'sensors', 'created_at']
+        fields = ["id", "name", "description", "owner", "sensors", "created_at"]
 
     def validate_name(self, value):
-        user = self.context['request'].user
+        user = self.context["request"].user
         if HydroponicSystem.objects.filter(owner=user, name=value).exists():
             raise serializers.ValidationError("Masz już system o tej nazwie.")
         return value
+
 
 class HydroponicSystemDetailSerializer(serializers.ModelSerializer):
     sensors = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -68,14 +84,24 @@ class HydroponicSystemDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HydroponicSystem
-        fields = ['id', 'name', 'description', 'owner', 'sensors', 'created_at', 'last_10_measurements']
+        fields = [
+            "id",
+            "name",
+            "description",
+            "owner",
+            "sensors",
+            "created_at",
+            "last_10_measurements",
+        ]
 
     def get_last_10_measurements(self, obj):
-        measurements = Measurement.objects.filter(sensor__system=obj).order_by('-measured_at')[:10]
+        measurements = Measurement.objects.filter(sensor__system=obj).order_by(
+            "-measured_at"
+        )[:10]
         return MeasurementSerializer(measurements, many=True).data
 
     def validate_name(self, value):
-        user = self.context['request'].user
+        user = self.context["request"].user
         if HydroponicSystem.objects.filter(owner=user, name=value).exists():
             raise serializers.ValidationError("Masz już system o tej nazwie.")
         return value
