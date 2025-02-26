@@ -2,45 +2,99 @@
 
 Projekt API do zarządzania systemami hydroponicznym.
 
-## Wymagania systemowe
-- Python **3.10+**
-- PostgreSQL **17**
-- Django **5.1.6**
-- Django REST Framework **3.15.2**
+* Tworzenie i edycja systemów hydroponicznych.
+* Dodawanie czujników (pH, temperatura, TDS) do systemu.
+* Zapisywanie i odczytywanie pomiarów z czujników.
+* Filtrowanie, sortowanie, paginacja danych.
+* Autoryzacja użytkowników (JWT lub inna
+
+## Wymagania systemowe.
+* Python 3.9+
+* PostgreSQL 14+ (lub nowszy)
+* pip (zarządzanie pakietami Pythona)
+* virtualenv lub inne środowisko wirtualne
+
+## Instalacja.
 
 **1. Klonowanie repozytorium:**
 
 
-    > git clone https://github.com/twoje-repo/hydroponic-system.git
+    > git clone https://github.com/DiWorg/hydroponic.git
     
-    > cd hydroponic-system
+    > cd hydroponic
 
 
-**2. Utworzenie środowiska i instalacja zależności:**
+**2. Utworzenie środowiska:**
 
 
-    > python -m venv venv
-
-    > source venv/bin/activate
-
-    > pip install -r requirements.txt
-
-
-**3. Konfiguracja .env - wprowadź własne dane:**
-
-    DATABASE_NAME=NAME
+    python -m venv venv
     
-    DATABASE_USER=USERNAME
+    source venv/bin/activate   # Linux/MacOS
     
-    DATABASE_PASSWORD=PASSWORD
+    # lub
     
-    DATABASE_HOST=localhost
-    
-    DATABASE_PORT=5432
+    venv\Scripts\activate      # Windows
 
 
-**4. Migracja i uruchomienie serwera:**
+**3. Instalacja zależności:**
 
-    > python manage.py migrate
-    
-    > python manage.py runserver
+    pip install -r requirements.txt
+
+**4. Utworzenie bazy danych PostgreSQL:**
+* Upewnij się, że serwer PostgreSQL działa i masz utworzoną bazę danych.
+* Jeśli potrzebujesz utworzyć bazę, wykonaj np.:
+
+        createdb hydroponic_db -U postgres
+
+**5. Konfiguracja bazy danych PostgreSQL:**
+* Stwórz plik .env na podstawie .env.example.
+
+        DATABASE_NAME=hydroponic_db
+        DATABASE_USER=USER
+        DATABASE_PASSWORD=HASLO
+        DATABASE_HOST=localhost
+        DATABASE_PORT=5432
+
+
+**6. Migracja i uruchomienie serwera:**
+
+    python manage.py makemigrations
+    python manage.py migrate
+
+**7. Tworzenie superużytkownika (jeśli chcesz mieć dostęp do panelu admin):**
+
+    python manage.py createsuperuser
+
+## Uruchamianie aplikacji.
+**1. Uruchom serwer:**
+
+    python manage.py runserver
+
+Aplikacja będzie dostępna pod adresem:
+http://127.0.0.1:8000/.
+
+Logowanie do panelu admin (opcjonalne):
+http://127.0.0.1:8000/admin/ przy pomocy danych superużytkownika.
+
+Dokumentacja API:
+
+* http://127.0.0.1:8000/swagger/
+
+* http://127.0.0.1:8000/redoc/
+
+## Seedowanie danych.
+
+Możesz  zapełnić bazę przykładowymi danymi:
+
+    python manage.py seed_test_data
+
+## Konfiguracja dodatkowa.
+
+**Debug Toolbar**
+
+W trybie deweloperskim możesz użyć django-debug-toolbar, aby monitorować zapytania SQL i wydajność. Upewnij się, że masz DEBUG=True w .env.
+
+**Paginacja**
+
+Ustawienia paginacji dostępne są w pagination.py.
+Można je modyfikować w celu zwiększenia lub zmniejszenia liczby elementów na stronie
