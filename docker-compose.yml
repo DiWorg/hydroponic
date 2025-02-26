@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:14
+    container_name: hydroponic_db
+    environment:
+      - POSTGRES_DB=hydroponic_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - hydro_network
+
+  web:
+    build: .
+    container_name: hydroponic_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_NAME=hydroponic_db
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=1234
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DEBUG=True
+    depends_on:
+      - db
+    networks:
+      - hydro_network
+
+networks:
+  hydro_network:
+
+volumes:
+  postgres_data:
